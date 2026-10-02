@@ -1,248 +1,330 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Property tour</title>
-<meta name="robots" content="noindex">
-<link rel="stylesheet" href="pannellum.css">
+<title>Romm Convent · Type C11</title>
+
 <style>
-  :root {
-    --ink: #12181f;
-    --glass: rgba(18, 24, 31, 0.62);
-    --glass-hover: rgba(18, 24, 31, 0.82);
-    --line: rgba(255, 255, 255, 0.22);
-    --paper: #ffffff;
-    --font: "Avenir Next", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; background: var(--ink); font-family: var(--font); }
-  body { overflow: hidden; color: var(--paper); }
+/* ---- Pannellum 2.5.6 engine styles (vendored, required for the viewer surface) ---- */
+.pnlm-container{margin:0;padding:0;overflow:hidden;position:relative;cursor:default;width:100%;height:100%;font-family:Helvetica,"Nimbus Sans L","Liberation Sans",Arial,sans-serif;background:#111;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-o-user-select:none;-ms-user-select:none;user-select:none;outline:0;line-height:1.4;contain:content}.pnlm-container *{box-sizing:content-box}.pnlm-ui{position:absolute;width:100%;height:100%;z-index:1}.pnlm-grab{cursor:grab}.pnlm-grabbing{cursor:grabbing}.pnlm-container:-moz-full-screen{height:100%!important;width:100%!important;position:static!important}.pnlm-container:-webkit-full-screen{height:100%!important;width:100%!important;position:static!important}.pnlm-container:-ms-fullscreen{height:100%!important;width:100%!important;position:static!important}.pnlm-container:fullscreen{height:100%!important;width:100%!important;position:static!important}.pnlm-render-container{cursor:inherit;position:absolute;height:100%;width:100%}.pnlm-load-box{position:absolute;top:50%;left:50%;width:200px;height:150px;margin:-75px 0 0 -100px;background-color:rgba(0,0,0,0.7);border-radius:3px;text-align:center;font-size:20px;display:none;color:#fff}.pnlm-load-box p{margin:20px 0}.pnlm-lbox{position:absolute;top:50%;left:50%;width:20px;height:20px;margin:-10px 0 0 -10px;display:none}.pnlm-loading{animation-duration:1.5s;-webkit-animation-duration:1.5s;animation-name:pnlm-mv;-webkit-animation-name:pnlm-mv;animation-iteration-count:infinite;-webkit-animation-iteration-count:infinite;animation-timing-function:linear;-webkit-animation-timing-function:linear;height:10px;width:10px;background-color:#fff;position:relative}@keyframes pnlm-mv{from{left:0;top:0}25%{left:10px;top:0}50%{left:10px;top:10px}75%{left:0;top:10px}to{left:0;top:0}}.pnlm-error-msg{display:none}.pnlm-hotspot-base{position:absolute;visibility:hidden;cursor:default;vertical-align:middle;top:0;z-index:1}.pnlm-world{position:absolute;left:50%;top:50%}.pnlm-face{position:absolute;-webkit-transform-origin:0 0;transform-origin:0 0}.pnlm-dragfix,.pnlm-preview-img{position:absolute;height:100%;width:100%}.pnlm-preview-img{background-size:cover;background-position:center}.pnlm-fade-img{position:absolute;top:0;left:0}.pnlm-pointer{cursor:pointer}
 
-  #pano { position: fixed; inset: 0; width: 100%; height: 100%; }
+/* ---- Page design ----
+   Layout: full-bleed panorama with no chrome — just the identification
+   caption (top-left, set directly on the image) and a floating pill bar
+   of room names (bottom-center). Matches the house tour template:
+   one neutral sans throughout, nothing boxed or carded. */
+:root{
+  --fg:#ffffff;
+  --muted:rgba(255,255,255,.82);
+  --pill-bg:rgba(20,20,22,.55);
+  --pill-bg-hover:rgba(20,20,22,.72);
+  --pill-active-bg:#ffffff;
+  --pill-active-fg:#15161a;
+  --shadow-text:0 1px 3px rgba(0,0,0,.65), 0 1px 14px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
 
-  /* Move the viewer's fullscreen button to the top right, out of the way of the title */
-  .pnlm-controls-container { top: calc(env(safe-area-inset-top, 0px) + 12px); left: auto; right: 12px; }
-  .pnlm-panorama-info, .pnlm-about-msg { display: none !important; }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:#0c0c0d;
+  color:var(--fg);
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  padding-inline:0;
+  overflow:hidden;
+}
 
-  header {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 5;
-    padding: calc(env(safe-area-inset-top, 0px) + 16px) 20px 28px;
-    pointer-events: none;
-    background: linear-gradient(to bottom, rgba(10, 14, 18, 0.55), rgba(10, 14, 18, 0));
-  }
-  header h1 { text-wrap: balance; margin: 0; font-size: 1.15rem; font-weight: 650; letter-spacing: 0.01em; text-shadow: 0 1px 8px rgba(0,0,0,.45); padding-right: 56px; }
-  header p  { margin: 3px 0 0; font-size: 0.86rem; line-height: 1.45; white-space: pre-line; opacity: 0.85; text-shadow: 0 1px 6px rgba(0,0,0,.45); padding-right: 56px; }
+.stage{
+  position:relative;
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  background:#000;
+}
+#pano{position:absolute;inset:0}
 
+/* identification caption */
+.caption{
+  position:absolute;
+  top:calc(20px + env(safe-area-inset-top,0px));
+  left:24px;
+  right:24px;
+  z-index:4;
+  pointer-events:none;
+  text-shadow:var(--shadow-text);
+}
+.caption h1{
+  margin:0 0 6px;
+  font-size:clamp(17px,2.1vw,22px);
+  font-weight:700;
+  letter-spacing:-.01em;
+}
+.caption p{
+  margin:0;
+  font-size:14px;
+  line-height:1.55;
+  font-weight:500;
+  color:var(--muted);
+}
 
-  #brand { margin: 0 0 6px; font-size: 0.78rem; font-weight: 650; letter-spacing: 0.06em; text-shadow: 0 1px 6px rgba(0,0,0,.45); opacity: .95; }
-  /* Labels placed inside the 360 photo */
-  .pin { transform: translate(-50%, -50%); }
-  .pin span {
-    display: inline-block; white-space: pre-line; text-align: center; padding: 10px 18px; border-radius: 18px;
-    background: rgba(255,255,255,.94); color: var(--ink);
-    font: 650 0.9rem/1.35 var(--font); letter-spacing: .02em;
-    box-shadow: 0 2px 12px rgba(0,0,0,.35);
-  }
-  .pin.note span { font-weight: 550; background: var(--glass); color: #fff; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--line); }
+/* pill room nav */
+.nav-wrap{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:calc(22px + env(safe-area-inset-bottom,0px));
+  z-index:4;
+  display:flex;
+  justify-content:center;
+  padding:0 16px;
+}
+.nav{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  max-width:100%;
+  padding:4px 2px;
+  scrollbar-width:none;
+}
+.nav::-webkit-scrollbar{display:none}
+.pill{
+  flex:0 0 auto;
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:-.005em;
+  color:var(--fg);
+  background:var(--pill-bg);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  padding:11px 20px;
+  border-radius:999px;
+  transition:background .15s ease, color .15s ease, transform .1s ease;
+  white-space:nowrap;
+}
+.pill:hover{background:var(--pill-bg-hover)}
+.pill:active{transform:scale(.97)}
+.pill.active{background:var(--pill-active-bg);color:var(--pill-active-fg)}
+.pill:focus-visible{outline:2px solid #fff;outline-offset:2px}
 
-  #hint {
-    position: fixed; left: 50%; z-index: 5;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 92px);
-    transform: translateX(-50%);
-    padding: 8px 16px; border-radius: 999px;
-    background: var(--glass); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    font-size: 0.85rem; white-space: nowrap; pointer-events: none;
-    transition: opacity .6s ease;
-  }
-  #hint.gone { opacity: 0; }
+.hint{
+  position:absolute;
+  left:50%;
+  bottom:calc(84px + env(safe-area-inset-bottom,0px));
+  transform:translateX(-50%);
+  font-size:12.5px;
+  font-weight:500;
+  color:var(--muted);
+  pointer-events:none;
+  text-shadow:var(--shadow-text);
+  transition:opacity .6s ease;
+  white-space:nowrap;
+  z-index:4;
+}
+.hint[hidden]{display:none}
 
-  nav {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
-    padding: 28px 0 calc(env(safe-area-inset-bottom, 0px) + 14px);
-    background: linear-gradient(to top, rgba(10, 14, 18, 0.6), rgba(10, 14, 18, 0));
-  }
-  #rooms {
-    display: flex; gap: 8px; margin: 0; padding: 0 16px; list-style: none;
-    overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none;
-  }
-  #rooms::-webkit-scrollbar { display: none; }
-  /* Center the buttons when they all fit on screen */
-  #rooms::before, #rooms::after { content: ""; margin: auto; }
+/* fullscreen toggle */
+.fs-btn{
+  position:absolute;
+  top:calc(18px + env(safe-area-inset-top,0px));
+  right:20px;
+  z-index:4;
+  width:34px;
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  border:none;
+  cursor:pointer;
+  color:var(--fg);
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,.65));
+}
+.fs-btn svg{width:22px;height:22px;display:block}
+.fs-btn:focus-visible{outline:2px solid #fff;outline-offset:2px;border-radius:4px}
 
-  #rooms button {
-    flex: none; scroll-snap-align: center;
-    min-height: 46px; padding: 0 20px; white-space: nowrap; border-radius: 999px;
-    border: 1px solid var(--line);
-    background: var(--glass); color: var(--paper);
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    font: 500 0.95rem/1 var(--font); cursor: pointer;
-    transition: background-color .2s ease, color .2s ease, border-color .2s ease;
-  }
-  #rooms button:hover { background: var(--glass-hover); }
-  #rooms button[aria-current="true"] { background: var(--paper); color: var(--ink); border-color: var(--paper); font-weight: 650; }
-  #rooms button:focus-visible { outline: 3px solid #ffffff; outline-offset: 3px; }
+/* nadir brand badge (anchored into the panorama, straight down) */
+.brand-badge{
+  background:#ffffff;
+  color:#15161a;
+  padding:10px 16px;
+  border-radius:14px;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  font-size:13px;
+  font-weight:700;
+  line-height:1.5;
+  text-align:center;
+  white-space:nowrap;
+  box-shadow:0 2px 10px rgba(0,0,0,.3);
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+}
 
-  @media (max-width: 520px) {
-    header h1 { font-size: min(1rem, 4.1vw); padding-right: 44px; }
-    header p { padding-right: 44px; }
-    #hint { bottom: calc(env(safe-area-inset-bottom, 0px) + 88px); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
-  }
+.stage-fade{
+  position:absolute;inset:0;background:#0c0c0d;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .35s ease;
+  pointer-events:none;
+  opacity:0;
+  z-index:3;
+}
+.stage-fade.show{opacity:1;pointer-events:auto}
+.spin{
+  width:26px;height:26px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.2);
+  border-top-color:#fff;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (max-width:560px){
+  .caption{left:16px;right:16px;top:calc(14px + env(safe-area-inset-top,0px))}
+  .caption p{font-size:12.5px}
+  .pill{padding:9px 15px;font-size:13px}
+  .nav-wrap{bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+}
 </style>
-</head>
-<body>
 
-<div id="pano"></div>
+<div class="stage">
+  <div id="pano"></div>
 
-<header>
-  <div id="brand"></div>
-  <h1 id="title"></h1>
-  <p id="subtitle"></p>
-</header>
+  <div class="caption">
+    <h1>Nexspace Realty Exclusive at Romm Convent</h1>
+    <p>Type C11 &middot; 117 sq.m.<br>2BR Plus, 2BA<br>Floor 5</p>
+  </div>
 
-<div id="hint">Drag to look around</div>
+  <div class="hint" id="hint">Drag to look around &nbsp;&middot;&nbsp; scroll to zoom</div>
 
-<nav aria-label="Rooms">
-  <ul id="rooms"></ul>
-</nav>
+  <button class="fs-btn" id="btnFull" type="button" title="Fullscreen" aria-label="Fullscreen">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+  </button>
 
-<noscript><p style="position:fixed;inset:0;display:grid;place-items:center;text-align:center;padding:24px">This tour needs JavaScript. Please open the link in a regular browser.</p></noscript>
+  <div class="nav-wrap">
+    <nav class="nav" id="nav" aria-label="Rooms"></nav>
+  </div>
 
-<script src="pannellum.js"></script>
+  <div class="stage-fade" id="stageFade"><div class="spin"></div></div>
+</div>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pannellum/2.5.6/pannellum.js"></script>
 <script>
-/* ==========================================================================
-   EDIT THIS PART ONLY
-   - title / subtitle: shown at the top of the page
-   - brand: your company name (floor label in every room; brandOnTop: true adds it above the title too)
-   - rooms: one line per button, in the order you want them.
-       id:   short name with no spaces (used in the link, e.g. ...#kitchen)
-       name: the text on the button
-       file: the photo file name
-       pins: (optional) text labels in the photo, e.g.
-             pins: [ { pitch: -5, yaw: 40, text: "Marble island" } ]
-             pitch = up/down (-90 floor, 0 eye level, 90 ceiling), yaw = left/right (-180 to 180)
-   ========================================================================== */
-const TOUR = {
-  brand: "Nexspace Realty\nLINE ID: @nexspace",   // logo label on the floor of every room (look straight down). \n = new line. Use "" to hide.
-  brandOnTop: false,          // set to true to also show the brand above the title
-  title: "Nexspace Realty Exclusive at Romm Convent",
-  subtitle: "Type C6 \u00b7 96.95 sqm\n2BR, 2BA\nFloor 19",   // \n starts a new line
-  rooms: [
-    { id: "living-room",           name: "Living room",           file: "living-room.jpg" },
-    { id: "city-view",             name: "City view",             file: "city-view.jpg" },
-    { id: "island-kitchen",        name: "Island kitchen",        file: "island-kitchen.jpg" },
-    { id: "hallway",                name: "Hallway",                file: "hallway.jpg" },
-    { id: "bathroom-2",            name: "Bathroom 2",            file: "bathroom-2.jpg" },
-    { id: "bedroom-2",             name: "Bedroom 2",             file: "bedroom-2.jpg" },
-    { id: "master-bedroom-closet", name: "Master bedroom closet", file: "master-bedroom-closet.jpg" },
-    { id: "master-bedroom",        name: "Master bedroom",        file: "master-bedroom.jpg" },
-    { id: "master-bedroom-view",   name: "Master bedroom view",   file: "master-bedroom-view.jpg" },
-    { id: "master-bathroom",       name: "Master bathroom",       file: "master-bathroom.jpg" }
-  ]
-};
-/* ==========================================================================
-   Nothing below needs editing
-   ========================================================================== */
+(function(){
+  var rooms = [
+    { slug:"entrance",        file:"01-entrance.jpg",       name:"Entrance" },
+    { slug:"living-room",     file:"02-living-room.jpg",    name:"Living room" },
+    { slug:"powder-room",     file:"03-powder-room.jpg",    name:"Powder room" },
+    { slug:"hallway",         file:"04-hallway.jpg",        name:"Hallway" },
+    { slug:"guest-bathroom",  file:"05-guest-bathroom.jpg", name:"Guest bathroom" },
+    { slug:"master-hall",     file:"06-master-hall.jpg",    name:"Master hall" },
+    { slug:"master-bathroom", file:"07-master-bathroom.jpg",name:"Master bathroom" },
+    { slug:"master-bedroom",  file:"08-master-bedroom.jpg", name:"Master bedroom" },
+    { slug:"bedroom-2",       file:"09-bedroom-view.jpg",   name:"Bedroom 2" },
+    { slug:"kitchen-dining",  file:"10-kitchen-dining.jpg", name:"Kitchen" }
+  ];
 
-(function () {
-  var rooms = TOUR.rooms;
-  var ids = rooms.map(function (r) { return r.id; });
-  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  document.getElementById("title").textContent = TOUR.title;
-  var brandEl = document.getElementById("brand");
-  if (TOUR.brand && TOUR.brandOnTop) { brandEl.textContent = TOUR.brand; } else { brandEl.remove(); }
-
-  function makePin(div, text) {
-    div.classList.add("pin");
-    var sp = document.createElement("span");
-    sp.textContent = text;
-    div.appendChild(sp);
-  }
-  var sub = document.getElementById("subtitle");
-  if (TOUR.subtitle) { sub.textContent = TOUR.subtitle; } else { sub.remove(); }
+  // Brand watermark shown at the nadir (straight down) of every scene,
+  // covering the tripod mark the same way on each panorama.
+  var BRAND_LINE1 = "Nexspace Realty";
+  var BRAND_LINE2 = "LINE ID: @nexspace";
 
   var scenes = {};
-  rooms.forEach(function (r) {
-    var spots = [];
-    if (TOUR.brand) {
-      spots.push({ pitch: -90, yaw: 0, type: "custom", cssClass: "pin brand-pin", createTooltipFunc: makePin, createTooltipArgs: TOUR.brand });
-    }
-    (r.pins || []).forEach(function (p) {
-      spots.push({ pitch: p.pitch, yaw: p.yaw, type: "custom", cssClass: "pin note", createTooltipFunc: makePin, createTooltipArgs: p.text });
-    });
-    scenes[r.id] = { type: "equirectangular", panorama: r.file, yaw: r.yaw || 0, pitch: 0, hfov: r.hfov || 100, hotSpots: spots };
+  rooms.forEach(function(r){
+    scenes[r.slug] = {
+      type:"equirectangular",
+      panorama:r.file,
+      title:r.name,
+      hfov:112,
+      minHfov:50,
+      maxHfov:120,
+      pitch:2,
+      yaw:0,
+      autoLoad:true,
+      hotSpots:[{
+        pitch:-90,
+        yaw:0,
+        cssClass:"brand-badge",
+        createTooltipFunc:function(div){
+          div.innerHTML = '<strong>' + BRAND_LINE1 + '</strong><br>' + BRAND_LINE2;
+        }
+      }]
+    };
   });
 
-  var fromHash = location.hash.replace("#", "");
-  var start = ids.indexOf(fromHash) > -1 ? fromHash : ids[0];
-
-  var viewer = pannellum.viewer("pano", {
-    default: {
-      firstScene: start,
-      sceneFadeDuration: 700,
-      autoLoad: true,
-      showZoomCtrl: false,
-      showFullscreenCtrl: true,
-      compass: false,
-      minHfov: 50,
-      maxHfov: 120,
-      autoRotate: reduceMotion ? 0 : -2
-    },
-    scenes: scenes
-  });
-
-  // Build one button per room
-  var list = document.getElementById("rooms");
-  var buttons = {};
-  rooms.forEach(function (r) {
-    var li = document.createElement("li");
-    var b = document.createElement("button");
-    b.type = "button";
-    b.textContent = r.name;
-    b.addEventListener("click", function () {
-      if (viewer.getScene() !== r.id) { viewer.loadScene(r.id); setActive(r.id); }
-    });
-    li.appendChild(b);
-    list.appendChild(li);
-    buttons[r.id] = b;
-  });
-
-  function setActive(id) {
-    ids.forEach(function (k) {
-      if (k === id) { buttons[k].setAttribute("aria-current", "true"); }
-      else { buttons[k].removeAttribute("aria-current"); }
-    });
-    buttons[id].scrollIntoView({ inline: "center", block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
-    var name = rooms[ids.indexOf(id)].name;
-    document.title = name + " \u2013 " + TOUR.title;
-    try { history.replaceState(null, "", "#" + id); } catch (e) {}
-    // Warm up the next room's photo so switching feels instant
-    var next = rooms[(ids.indexOf(id) + 1) % rooms.length];
-    if (next && next.id !== id) { new Image().src = next.file; }
+  var startSlug = (location.hash || "").replace("#","");
+  if (!rooms.some(function(r){ return r.slug === startSlug; })) {
+    startSlug = rooms[0].slug;
   }
 
-  viewer.on("scenechange", setActive);
-  viewer.on("load", function () { setActive(viewer.getScene()); });
-
-  // Hide the hint after the first drag or touch
-  var hint = document.getElementById("hint");
-  function hideHint() { hint.classList.add("gone"); }
-  viewer.on("mousedown", hideHint);
-  viewer.on("touchstart", hideHint);
-  setTimeout(hideHint, 9000);
-
-  // Left/right arrow keys switch rooms on a laptop
-  document.addEventListener("keydown", function (e) {
-    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") { return; }
-    var i = ids.indexOf(viewer.getScene());
-    var n = e.key === "ArrowRight" ? (i + 1) % ids.length : (i - 1 + ids.length) % ids.length;
-    if (e.shiftKey) { viewer.loadScene(ids[n]); setActive(ids[n]); }
+  var viewer = pannellum.viewer('pano', {
+    default:{
+      firstScene:startSlug,
+      sceneFadeDuration:650,
+      autoLoad:true,
+      showZoomCtrl:false,
+      showFullscreenCtrl:false,
+      showControls:false,
+      compass:false,
+      hotSpotDebug:false
+    },
+    scenes:scenes
   });
+
+  var navEl = document.getElementById('nav');
+  var fadeEl = document.getElementById('stageFade');
+  var hintEl = document.getElementById('hint');
+
+  rooms.forEach(function(r){
+    var btn = document.createElement('button');
+    btn.type = "button";
+    btn.className = "pill" + (r.slug === startSlug ? " active" : "");
+    btn.textContent = r.name;
+    btn.dataset.slug = r.slug;
+    btn.addEventListener('click', function(){ goTo(r.slug); });
+    navEl.appendChild(btn);
+  });
+
+  function goTo(slug){
+    if (slug === viewer.getScene()) return;
+    fadeEl.classList.add('show');
+    viewer.loadScene(slug);
+    history.replaceState(null, "", "#" + slug);
+  }
+
+  function syncUI(slug){
+    Array.prototype.forEach.call(navEl.children, function(el){
+      el.classList.toggle('active', el.dataset.slug === slug);
+    });
+    var active = navEl.querySelector('.pill.active');
+    if (active && active.scrollIntoView) {
+      active.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+    }
+  }
+
+  viewer.on('scenechange', function(slug){
+    syncUI(slug);
+    fadeEl.classList.remove('show');
+  });
+
+  syncUI(startSlug);
+
+  window.addEventListener('hashchange', function(){
+    var slug = (location.hash || "").replace("#","");
+    if (rooms.some(function(r){ return r.slug === slug; })) goTo(slug);
+  });
+
+  document.getElementById('btnFull').addEventListener('click', function(){
+    try { viewer.toggleFullscreen(); } catch(e){}
+  });
+
+  var dismissed = false;
+  function dismissHint(){
+    if (dismissed) return;
+    dismissed = true;
+    hintEl.style.opacity = '0';
+    setTimeout(function(){ hintEl.hidden = true; }, 650);
+  }
+  document.getElementById('pano').addEventListener('pointerdown', dismissHint, { once:true });
+  setTimeout(dismissHint, 6000);
 })();
 </script>
-</body>
-</html>
